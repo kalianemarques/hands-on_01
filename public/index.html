@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="index.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
     <title>Document</title>
 </head>
 <body>
-    <div>
+    <div style="display: flex; flex-direction: row;">
         <section id="inputs">
             <p>Parametros de entrada</p>
             <div>
@@ -27,18 +28,24 @@
                 <input type="number" id="potencia" placeholder="Potência de transmissão (dBm)">
             </div>
             <button id="calculateReceivedPower">Calcular potencia</button>
-            <button id="showAutageArea">Ver area de autage</button>
-            <button id="add-microcelula"></button>
+            <button id="showOutageArea">Ver area de outage </button>
+            <button id="add-microcelula" style="display: none;"></button>
+            <button id="delet-all-microcelula" style="display: none;"></button>
         </section>    
         <section id="results">
-            <div id="macrocelula"></div>
-            <div id="microcelula">
+            <p>Taxa de outage</p>
+            <div id="macrocelula" style="display: none;">
+                <p >Macrocelula: <span id="result-outage-macrocelula"></span>%</p>
+            </div>
+            <div id="microcelula" style="display: none;">
+                <p>Microcelula: <span id="result-outage-microcelula"></span>%</p>
             </div>
         </section>
     </div>
-    <div id="results-region">
-        <section id="power-graph"></section>
-        <section id="autage-graph"></section>
+    <div id="results-region" style="display: flex; flex-direction: row;">
+        <section id="macrocelula-graphic" style="display: none;"></section>
+        <section id="microcelula-graphic" style="display: none;"></section>
     </div>
 </body>
+<script type="module" src="module/index.js"></script>
 </html>

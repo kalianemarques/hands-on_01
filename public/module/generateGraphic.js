@@ -1,0 +1,1 @@
+// +funções referentes a geração do grafico
