@@ -3,10 +3,13 @@ from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 from fDrawDeploy import DrawDeploy
 
-def GenerateGraph(dFc, dR, dHMob, dHBs, dPtdBm, dPtdBmMicro, vtBsMicro, dSensitivity):
+def GenerateGraph(dFc, dR, dPtdBm, dPtdBmMicro, vtBsMicro, GridRes):
 
     # Cálculos de outras variáveis que dependem dos parâmetros de entrada
-    dPasso = np.ceil(dR / 100)  # Resolução do grid: distância entre pontos de medição
+    dHMob = 1.5  # Altura do receptor em metros
+    dHBs = 32  # Altura do transmissor em metros
+    dSensitivity = -90  # Sensibilidade do receptor
+    dPasso = np.ceil(dR / GridRes)  # Resolução do grid: distância entre pontos de medição
     dRMin = dPasso  # Raio de segurança
     dIntersiteDistance = 2 * np.sqrt(3 / 4) * dR  # Distância entre ERBs (somente para informação)
     dDimX = 5 * dR  # Dimensão X do grid
