@@ -1,21 +1,18 @@
 import numpy as np
-from plotly.subplots import make_subplots
-import plotly.graph_objects as go
+import json
 from fDrawDeploy import DrawDeploy
+from fDrawSector import DrawSector
 
-def GenerateGraph(dFc, dR, dPtdBm, dPtdBmMicro, vtBsMicro, GridRes):
+def GenerateGraph(dFc, dR, dPtdBm, dPtdBmMicro, vtBsMicro, dPasso):
 
     # Cálculos de outras variáveis que dependem dos parâmetros de entrada
     dHMob = 1.5  # Altura do receptor em metros
     dHBs = 32  # Altura do transmissor em metros
     dSensitivity = -90  # Sensibilidade do receptor
-    dPasso = np.ceil(dR / GridRes)  # Resolução do grid: distância entre pontos de medição
     dRMin = dPasso  # Raio de segurança
-    dIntersiteDistance = 2 * np.sqrt(3 / 4) * dR  # Distância entre ERBs (somente para informação)
     dDimX = 5 * dR  # Dimensão X do grid
     dDimY = 6 * np.sqrt(3 / 4) * dR  # Dimensão Y do grid
-    dPtLinear = 10**(dPtdBm / 10) * 1e-3  # EIRP em escala linear Watts
-
+    
     # Modelo Okumura-Hata
     if dFc >= 400:
         dAhm = 3.2 * (np.log10(11.75 * dHMob))**2 - 4.97
@@ -61,8 +58,12 @@ def GenerateGraph(dFc, dR, dPtdBm, dPtdBmMicro, vtBsMicro, GridRes):
         
         # Cálulo da maior potência em cada ponto de medição
         mtPowerFinaldBm[mask] = np.maximum(mtPowerFinaldBm[mask], mtPowerEachBSdBm)
+        
+        graph_data.append({
+            "hexagon": DrawSector(dR, vtBs[iBsD])
+        })
 
-    # Repetindo o mesmo processo para as microcélulas (se existirem)
+    # Calcula O REM de cada Microcélula (caso existam) e acumula a maior potência em cada ponto de medição
     for iBsD in range(len(vtBsMicro)):
         mtPosEachBSMicro = (mtPosx + 1j * mtPosy) - vtBsMicro[iBsD]
         mtDistEachBsMicro = np.abs(mtPosEachBSMicro)
@@ -87,51 +88,31 @@ def GenerateGraph(dFc, dR, dPtdBm, dPtdBmMicro, vtBsMicro, GridRes):
     dOutRate = 100 * len(np.where(maskAllPoints & (mtPowerFinaldBm < dSensitivity))[0]) / np.sum(maskAllPoints)
     dOutRatePoint = np.where(maskAllPoints, np.where(mtPowerFinaldBm < dSensitivity, 0, 1), np.nan)  # Considerando apenas pontos dentro do cluster
 
-    # Criando o gráfico interativo com plotly
-    fig = go.Figure()
+    # Dados para os gráficos
+    graph_data = []
 
     # Adicionando a camada de potência final no gráfico
-    fig.add_trace(go.Heatmap(
-        z=dOutRatePoint,
-        x=mtPosx[0, :],  # Posições em X
-        y=mtPosy[:, 0],  # Posições em Y
-        colorscale='inferno',
-        opacity=1,  # Escolha da paleta de cores
-        hovertemplate='X: %{x} <br>Y: %{y}<extra></extra>',  # Exibição do valor da potência ao passar o mouse
-        showscale=False
-    ))
-    fig.add_trace(go.Heatmap(
-        z=mtPowerFinaldBm,  # Potência final (média das ERBs)
-        x=mtPosx[0, :],  # Posições em X
-        y=mtPosy[:, 0],  # Posições em Y
-        colorscale='plasma',  # Escolha da paleta de cores
-        colorbar=dict(title="Potência em (dBm)"),
-        opacity=0,
-        hovertemplate='<b>Potência:</b> %{z} dBm <br>X: %{x} <br>Y: %{y}<extra></extra>',  # Exibição do valor da potência ao passar o mouse
-        showscale=False
-    ))
-    
+    graph_data.append({
+        "x": mtPosx.tolist(),
+        "y": mtPosx.tolist(),
+        "power": mtPowerFinaldBm.tolist(),
+        "outage": dOutRatePoint.tolist()
+    })
+        
     # Se houver microcélulas, adicionar ao gráfico
-    if np.array(vtBsMicro).any():
-        fig.add_trace(go.Scatter(
-            x=vtBsMicro.real,
-            y=vtBsMicro.imag,
-            mode='markers',
-            marker=dict(color='red', size=10),
-            hovertemplate='<b>Micro-célula</b><br>X: %{x} <br>Y: %{y}<extra></extra>'
-        ))
+    #if np.array(vtBsMicro).any():
+     #   fig.add_trace(go.Scatter(
+      #      x=vtBsMicro.real,
+       #     y=vtBsMicro.imag,
+        #    mode='markers',
+         #   marker=dict(color='red', size=10),
+         #   hovertemplate='<b>Micro-célula</b><br>X: %{x} <br>Y: %{y}<extra></extra>'
+        #))
 
-    fig.update_layout(
-        template="simple_white",
-        title=f"Campo com Outage: {dOutRate:.2f} %",
-        xaxis_title="Posição X",
-        yaxis_title="Posição Y",
-        xaxis=dict(scaleanchor="y"),  # Para garantir que o gráfico seja proporcional
-        yaxis=dict(scaleanchor="x"),
-        legend=dict(entrywidth=0),
-        showlegend=False
-    )
+   
     
     # Exibindo o gráfico
-    DrawDeploy(dR, vtBs, fig)
-    fig.show()
+    #DrawDeploy(dR, vtBs)
+    
+    print(json.dumps(graph_data))
+    return dOutRate
