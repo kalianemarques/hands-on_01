@@ -1,4 +1,5 @@
 import numpy as np
+from fGenerateGraph import GenerateGraph
 import sys
 
 
