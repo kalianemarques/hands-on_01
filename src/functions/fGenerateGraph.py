@@ -1,37 +1,45 @@
+# Função que gera os dados dos gráficos de Potência e Outage
+
 import numpy as np
 import json
-from fDrawDeploy import DrawDeploy
 from fDrawSector import DrawSector
+from fOutageCalculate import OutageCalculate
 
 def GenerateGraph(dFc, dR, dPtdBm, dPtdBmMicro, vtBsMicro, dPasso):
 
+    # Parâmetros de entrada fixos
+    dHMob = 1.5  # Altura do receptor (m)
+    dHBs = 32  # Altura do transmissor em (m)
+    dSensitivity = -90  # Sensibilidade do receptor (dBm)
+    
     # Cálculos de outras variáveis que dependem dos parâmetros de entrada
-    dHMob = 1.5  # Altura do receptor em metros
-    dHBs = 32  # Altura do transmissor em metros
-    dSensitivity = -90  # Sensibilidade do receptor
     dRMin = dPasso  # Raio de segurança
     dDimX = 5 * dR  # Dimensão X do grid
     dDimY = 6 * np.sqrt(3 / 4) * dR  # Dimensão Y do grid
     
-    # Modelo Okumura-Hata
+    # Dados para os gráficos
+    graph_data = []
+    
+    # Modelo Okumura-Hata: Cálculo do Fator de Correção para grandes cidades considerando a frequência
     if dFc >= 400:
         dAhm = 3.2 * (np.log10(11.75 * dHMob))**2 - 4.97
     else:
         dAhm = 8.29 * (np.log10(11.54 * dHMob))**2 - 1.1
 
-    # Vetor com posições das BSs (grid Hexagonal com 7 células, uma célula central e uma camada de células ao redor)
+    # Vetor com posições das ERBs (grid Hexagonal com 7 células, uma célula central e uma camada de células ao redor)
     vtBs = [0]  # ERB 1 na posição 0,0
     dOffset = np.pi / 6  # Ângulo relativo entre as ERBs com relação ao centro
     for iBs in range(2, 8):
-        vtBs.append(dR * np.sqrt(3) * np.exp(1j * ((iBs - 2) * np.pi / 3 + dOffset)))  # Acrescenta a outras ERBs ao redor da ERB 1
+        vtBs.append(dR * np.sqrt(3) * np.exp(1j * ((iBs - 2) * np.pi / 3 + dOffset)))  # Acrescenta a outras ERBs ao redor da ERB 1 (0,0)
     vtBs = np.array(vtBs) + (dDimX / 2 + 1j * dDimY / 2)  # Ajuste de posição das bases (posição relativa ao canto inferior esquerdo)
 
     # Matriz de referência com posição de cada ponto do grid
-    dDimY = dDimY + np.mod(dDimY, dPasso)  # Ajuste de dimensão para medir toda a dimensão do grid
-    dDimX = dDimX + np.mod(dDimX, dPasso)  # Ajuste de dimensão para medir toda a dimensão do grid
-    mtPosx, mtPosy = np.meshgrid(np.arange(0, dDimX, dPasso), np.arange(0, dDimY, dPasso))  # O meshgrid gera uma matriz vetorizada e o arange retorna valores uniformemente espaçados (inicío, fim, step)
+    dDimY = dDimY + np.mod(dDimY, dPasso)  # Ajuste de dimensão
+    dDimX = dDimX + np.mod(dDimX, dPasso)  # Ajuste de dimensão
+    # O meshgrid gera uma matriz vetorizada e o arange retorna valores uniformemente espaçados (inicío, fim, step)
+    mtPosx, mtPosy = np.meshgrid(np.arange(0, dDimX, dPasso), np.arange(0, dDimY, dPasso))  
 
-    # Iniciação da Matriz de potência recebida máxima em cada ponto medido
+    # Iniciação da Matriz de potência máxima recebida em cada ponto medido
     mtPowerFinaldBm = -np.inf * np.ones_like(mtPosy)
 
     # Matriz de máscara para pontos dentro dos clusters das ERBs
@@ -59,6 +67,7 @@ def GenerateGraph(dFc, dR, dPtdBm, dPtdBmMicro, vtBsMicro, dPasso):
         # Cálulo da maior potência em cada ponto de medição
         mtPowerFinaldBm[mask] = np.maximum(mtPowerFinaldBm[mask], mtPowerEachBSdBm)
         
+        # Dados para geração do gráfico com cluster dos hexágonos
         graph_data.append({
             "hexagon": DrawSector(dR, vtBs[iBsD])
         })
@@ -85,34 +94,17 @@ def GenerateGraph(dFc, dR, dPtdBm, dPtdBmMicro, vtBsMicro, dPasso):
         mtPowerFinaldBm[maskMicro] = np.maximum(mtPowerFinaldBm[maskMicro], mtPowerEachBSdBmMicro)
 
     # Calculando a taxa de "outage" apenas para os pontos dentro do cluster de ERBs (onde a máscara é True)
-    dOutRate = 100 * len(np.where(maskAllPoints & (mtPowerFinaldBm < dSensitivity))[0]) / np.sum(maskAllPoints)
+    OutageCalculate (maskAllPoints, mtPowerFinaldBm, dSensitivity)
     dOutRatePoint = np.where(maskAllPoints, np.where(mtPowerFinaldBm < dSensitivity, 0, 1), np.nan)  # Considerando apenas pontos dentro do cluster
 
-    # Dados para os gráficos
-    graph_data = []
-
-    # Adicionando a camada de potência final no gráfico
+    # Adicionar dados do gráfico
     graph_data.append({
         "x": mtPosx.tolist(),
         "y": mtPosx.tolist(),
         "power": mtPowerFinaldBm.tolist(),
         "outage": dOutRatePoint.tolist()
     })
-        
-    # Se houver microcélulas, adicionar ao gráfico
-    #if np.array(vtBsMicro).any():
-     #   fig.add_trace(go.Scatter(
-      #      x=vtBsMicro.real,
-       #     y=vtBsMicro.imag,
-        #    mode='markers',
-         #   marker=dict(color='red', size=10),
-         #   hovertemplate='<b>Micro-célula</b><br>X: %{x} <br>Y: %{y}<extra></extra>'
-        #))
-
-   
     
-    # Exibindo o gráfico
-    #DrawDeploy(dR, vtBs)
-    
+    # Retornar os dados como JSON
     print(json.dumps(graph_data))
-    return dOutRate
+    
