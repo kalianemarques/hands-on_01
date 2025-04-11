@@ -24,7 +24,8 @@ body {
     padding: 20px;
     margin-right: 20px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    width: 300px;
+    width: 100%;
+    max-width: 994px;
 }
 
 #inputs p {
@@ -77,7 +78,8 @@ body {
     border-radius: 8px;
     padding: 20px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    width: 300px;
+    width: 100%;
+    max-width: 994px;
 }
 
 #results p {
@@ -115,6 +117,47 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+/* Estilo para os elementos do modal */
+#modal input, #modal label, #modal button {
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
+
+#modal input {
+    border: 1px solid #ddd;
+}
+
+#modal button {
+    background-color: #0078d7;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#modal button:hover {
+    background-color: #005a9e;
+}
+
+input:focus, button:focus {
+    outline: none;
+}
+
+#modal #delet-all-microcelula {
+    background-color: #d7002f;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#modal #delet-all-microcelula:hover {
+    background-color: #a7002f;
 }
 
 /* Responsividade */
