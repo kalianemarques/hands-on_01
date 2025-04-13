@@ -1,21 +1,29 @@
-# Este Script Python remove microcélula uma a uma (necessário executar MainTrigger para atualizar o gráfico)
+# Este script python adiciona uma microcélula (necessário executar MainTrigger para atualizar o gráfico)
 
 import numpy as np
 import sys
 
 # Receber parâmetros da linha de comando
-if len(sys.argv) < 3:
-    print("Uso: python RemoveEachMicroCell.py <X> <Y>")
+if len(sys.argv) < 4:
+    print("Uso: python AddEachMicroCell.py <X> <Y> <Power>")
     sys.exit(1)
 
-X = float(sys.argv[1])  # Coordenada X da Microcélula
-Y = float(sys.argv[2])  # Coordenada Y da Microcélula
+X = float(sys.argv[1])  # Coordenada X da microcélula
+Y = float(sys.argv[2])  # Coordenada Y da microcélula
+Power = float(sys.argv[3])  # Potência da Microcélula
 
-# Carrega o arquivo com os pontos das microcélulas armazenadas
-vtBsMicro = np.load('ListMicroCell.npy')
+# Carregar o arquivo existente ou criar um novo
+try:
+    vtBsMicro = np.load('ListMicroCell.npy')
+    # Garantir que o array tenha a estrutura correta
+    if vtBsMicro.size == 0:
+        vtBsMicro = np.empty((0, 3))
+except FileNotFoundError:
+    vtBsMicro = np.empty((0, 3))  # Matriz vazia com 3 colunas (x, y, power)
 
-RemoveMicro = X + 1j*Y
-if (RemoveMicro in vtBsMicro):
-    vtBsMicro = np.delete (vtBsMicro, RemoveMicro)
-vtBsMicro = np.array (vtBsMicro)
+# Adicionar a nova microcélula
+new_microcell = np.array([[X, Y, Power]])
+vtBsMicro = np.vstack([vtBsMicro, new_microcell])
+
+# Salvar o arquivo atualizado
 np.save('ListMicroCell.npy', vtBsMicro)

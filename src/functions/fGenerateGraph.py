@@ -72,35 +72,40 @@ def GenerateGraph(dFc, dR, dPtdBm, dPtdBmMicro, vtBsMicro, dPasso):
             "hexagon": DrawSector(dR, vtBs[iBsD])
         })
 
-    # Calcula O REM de cada Microcélula (caso existam) e acumula a maior potência em cada ponto de medição
-    for iBsD in range(len(vtBsMicro)):
-        mtPosEachBSMicro = (mtPosx + 1j * mtPosy) - vtBsMicro[iBsD]
-        mtDistEachBsMicro = np.abs(mtPosEachBSMicro)
-        mtDistEachBsMicro[mtDistEachBsMicro < dRMin] = dRMin
+    if len(vtBsMicro) > 0:
+        for iBsD in range(len(vtBsMicro)):
+            x, y, power = vtBsMicro[iBsD]  # Extraindo posição (x, y) e potência da microcélula
+            mtPosEachBSMicro = (mtPosx + 1j * mtPosy) - (x + 1j * y)  # Diferença entre posição da microcélula e os pontos do grid
+            mtDistEachBsMicro = np.abs(mtPosEachBSMicro)  # Distância entre cada ponto e a microcélula
+            mtDistEachBsMicro[mtDistEachBsMicro < dRMin] = dRMin  # Implementação do raio de segurança
 
-        # Verificando se os pontos estão dentro do raio das microcélulas
-        maskMicro = mtDistEachBsMicro <= dR
-        maskAllPoints = maskAllPoints | maskMicro  # Acumulando a máscara (considerando os pontos dentro de qualquer microcélula)
+            # Verificando se os pontos estão dentro do raio da microcélula
+            maskMicro = mtDistEachBsMicro <= dR
+            maskAllPoints = maskAllPoints | maskMicro  # Acumulando a máscara para todos os pontos dentro de qualquer microcélula
 
-        # Aplicando a máscara nos pontos de medição dentro do raio
-        mtPosEachBSMicroFiltered = mtPosEachBSMicro[maskMicro]
-        mtDistEachBsMicroFiltered = mtDistEachBsMicro[maskMicro]
+            # Aplicando a máscara nos pontos de medição dentro do raio
+            mtPosEachBSMicroFiltered = mtPosEachBSMicro[maskMicro]
+            mtDistEachBsMicroFiltered = mtDistEachBsMicro[maskMicro]
 
-        # Okumura-Hata (cidade urbana) - dB
-        mtPldBMicro = 55 + 38 * np.log10(mtDistEachBsMicroFiltered / 1e3) + (24.5 + (1.5 * dFc) / 925) * np.log10(dFc)
-        mtPowerEachBSdBmMicro = dPtdBmMicro - mtPldBMicro  # Potências recebidas em cada ponto de medição
-        
-        # Cálulo da maior potência em cada ponto de medição
-        mtPowerFinaldBm[maskMicro] = np.maximum(mtPowerFinaldBm[maskMicro], mtPowerEachBSdBmMicro)
+            # Okumura-Hata (cidade urbana) - dB
+            mtPldBMicro = 55 + 38 * np.log10(mtDistEachBsMicroFiltered / 1e3) + (24.5 + (1.5 * dFc) / 925) * np.log10(dFc)
+            mtPowerEachBSdBmMicro = power - mtPldBMicro  # Potências recebidas em cada ponto de medição
+
+            # Cálculo da maior potência em cada ponto de medição
+            mtPowerFinaldBm[maskMicro] = np.maximum(mtPowerFinaldBm[maskMicro], mtPowerEachBSdBmMicro)
 
     # Calculando a taxa de "outage" apenas para os pontos dentro do cluster de ERBs (onde a máscara é True)
     OutageCalculate (maskAllPoints, mtPowerFinaldBm, dSensitivity)
     dOutRatePoint = np.where(maskAllPoints, np.where(mtPowerFinaldBm < dSensitivity, 0, 1), np.nan)  # Considerando apenas pontos dentro do cluster
 
+    dOutRatePoint = np.where(maskAllPoints, np.where(mtPowerFinaldBm < dSensitivity, 0, 1), np.nan)
+    mtPowerFinaldBm = np.nan_to_num(mtPowerFinaldBm, nan=0, posinf=0, neginf=0)
+    dOutRatePoint = np.nan_to_num(dOutRatePoint, nan=0, posinf=0, neginf=0)
+
     # Adicionar dados do gráfico
     graph_data.append({
         "x": mtPosx.tolist(),
-        "y": mtPosx.tolist(),
+        "y": mtPosy.tolist(),
         "power": mtPowerFinaldBm.tolist(),
         "outage": dOutRatePoint.tolist()
     })
