@@ -1,0 +1,201 @@
+/* Reset básico */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    background-color: #f9f9f9;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+/* Estilo para a seção de inputs */
+#inputs {
+    background: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin-right: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 994px;
+}
+
+#inputs p {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+#inputs div {
+    margin-bottom: 15px;
+}
+
+#inputs label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+}
+
+#inputs input {
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+#inputs button {
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+    background-color: #0078d7;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.3s;
+}
+
+#inputs button:hover {
+    background-color: #005a9e;
+}
+
+/* Estilo para a seção de resultados */
+#results {
+    background: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 994px;
+}
+
+#results p {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+#results div {
+    margin-bottom: 10px;
+}
+
+#results span {
+    font-weight: bold;
+    color: #0078d7;
+}
+
+/* Estilo para a região de gráficos */
+#results-region {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    width: 100%;
+}
+
+#results-region section {
+    background: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Estilo para os elementos do modal */
+#modal input, #modal label, #modal button {
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
+
+#modal input {
+    border: 1px solid #ddd;
+}
+
+#modal button {
+    background-color: #0078d7;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#modal button:hover {
+    background-color: #005a9e;
+}
+
+input:focus, button:focus {
+    outline: none;
+}
+
+#modal #delet-all-microcelula {
+    background-color: #d7002f;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#modal #delet-all-microcelula:hover {
+    background-color: #a7002f;
+}
+
+#modal .card-microcelula {
+    background: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 10px;
+}
+
+.tooltip {
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.4;
+    color: #333;
+}
+
+.tooltip strong {
+    color: #000;
+}
+
+.error {
+    color: #df0635;
+    font-weight: bold;
+    font-size: medium;
+    text-align: center;
+    margin: -8px 0 15px 0;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    #inputs, #results {
+        width: 100%;
+        margin-right: 0;
+    }
+
+    #results-region {
+        flex-direction: column;
+    }
+}
