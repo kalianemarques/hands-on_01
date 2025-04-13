@@ -25,11 +25,11 @@
             </div>
             <div>
                 <label for="">potencia de transmissão</label>
-                <input type="number" id="potencia" placeholder="Potência de transmissão (dBm)">
+                <input type="number" id="power" placeholder="Potência de transmissão (dBm)">
             </div>
             <button id="calculateReceivedPower">Calcular potencia</button>
-            <button id="showOutageArea">Ver area de outage </button>
-            <button id="show-microcelula" style="display: block;">Microcélulas</button>
+            <button id="showOutageArea" disabled >Ver area de outage </button>
+            <button id="show-microcelula" disabled style="display: block;">Microcélulas</button>
         </section>    
         <section id="results">
             <p>Taxa de outage</p>
@@ -42,8 +42,8 @@
         </section>
     </div>
     <div id="results-region" style="display: flex; flex-direction: row;  width: 100%;justify-content: space-evenly;">
-        <section id="macrocelula-graphic" style="display: none;"></section>
-        <section id="microcelula-graphic" style="display: none;"></section>
+        <section id="power-graphic" style="display: none;max-width: 994px;"></section>
+        <section id="outage-graphic" style="display: none;max-width: 994px;"></section>
     </div>
     <!-- -modal que controla as microcelulas adicionadas (nele é possível adicionar uma nova, deletar uma existente e deletar todas...) -->
     <div id="hidden" style="display: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; background-color: rgba(0, 0, 0, 0.5); z-index: 9999;">
@@ -65,11 +65,11 @@
                 <div>
                     <label for="">Raio</label>
                     <input type="number" id="radius-micro" placeholder="Raio do hexagono (m)"> 
-                </div>
+                </div> -->
                 <div>
                     <label for="">potencia de transmissão</label>
-                    <input type="number" id="potencia-micro" placeholder="Potência de transmissão (dBm)">
-                </div> -->
+                    <input type="number" id="power-micro" placeholder="Potência de transmissão (dBm)">
+                </div>
                 <div>
                     <label for="">posição no eixo x</label>
                     <input type="number" id="position-x" placeholder="posição em metros">
@@ -78,11 +78,12 @@
                     <label for="">posição no eixo y</label>
                     <input type="number" id="position-y" placeholder="posição em metros">
                 </div>
+                <p id="error-micro" class="error"></p>
                 <button id="add-microcelula">Adicionar Microcélula</button>
             </div>
             <button id="delet-all-microcelula" style="display: none;"> Deletar todas as microcélulas</button>
-            <div id="added-microcelula">
-                <!-- -cards de microcelulas serão adicionados via js. Lembrar de por um scroll aqui tbm -->
+            <div id="added-microcelula" style="max-height: 60%; overflow-y: auto; margin-top: 20px;">
+                <!-- -cards de microcelulas serão adicionados via js -->
             </div>
         </div>
     </div>

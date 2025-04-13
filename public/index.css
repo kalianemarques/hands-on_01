@@ -160,6 +160,34 @@ input:focus, button:focus {
     background-color: #a7002f;
 }
 
+#modal .card-microcelula {
+    background: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 10px;
+}
+
+.tooltip {
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.4;
+    color: #333;
+}
+
+.tooltip strong {
+    color: #000;
+}
+
+.error {
+    color: #df0635;
+    font-weight: bold;
+    font-size: medium;
+    text-align: center;
+    margin: -8px 0 15px 0;
+}
+
 /* Responsividade */
 @media (max-width: 768px) {
     #inputs, #results {

@@ -2,65 +2,40 @@ const express = require('express');
 const router = express.Router();
 const { executePython } = require('../utils/executePython');
 
-// !rotas temporárias, ajusatar depois para os links corretos e os nomes corretos dos arquivos python
+router.post('/GenerateGraph', (req, res) => {
+    const { frequency, radius, grid, EIRP } = req.body;
+    if (!frequency || !radius || !grid || !EIRP) {
+        return res.status(400).json({ error: 'Parâmetros "frequency", "radius", "grid", "EIRP" são obrigatórios.' });
+    }
+    executePython('MainTrigger.py', [frequency, radius, grid, EIRP], res);
+});
 
-// rota para add microcelula - parametros { raio, coordenadas(objeto com x e y), potencia} 
+router.post('/GenerateGraphWithMicro', (req, res) => {
+    const { frequency, radius, grid, EIRP } = req.body;
+    if (!frequency || !radius || !grid || !EIRP ) {
+        return res.status(400).json({ error: 'Parâmetros "frequency", "radius", "grid", "EIRP" e "EIRPMiro" são obrigatórios.' });
+    }
+    executePython('MainTrigger.py', [frequency, radius, grid, EIRP], res);
+});
+
 router.post('/add_microcelula', (req, res) => {
-    const { raio, coordenadas, potencia } = req.body;
-    if (!raio || !coordenadas || !potencia) {
-        return res.status(400).json({ error: 'Parâmetros "raio", "coordenadas" e "potencia" são obrigatórios.' });
+    const { x, y, power } = req.body;
+    if (!x || !y) {
+        return res.status(400).json({ error: 'Parâmetros "x" e "y" são obrigatórios.' });
     }
-    executePython('', [raio, coordenadas, potencia], res);
+    executePython('AddEachMicroCell.py', [x, y, power], res);
 });
 
-// rota para deletar uma microcelula - parametro { coordenadas(objeto com x e y) }
-router.delete('/delete_microcelula', (req, res) => {
-    const { coordenadas } = req.body;
-    if (!coordenadas) {
-        return res.status(400).json({ error: 'Parâmetro "coordenadas" é obrigatório.' });
+router.post('/delete_microcelula', (req, res) => {
+    const { x, y } = req.body;
+    if (!x || !y) {
+        return res.status(400).json({ error: 'Parâmetros "x" e "y" são obrigatórios.' });
     }
-    executePython('', [coordenadas], res);
+    executePython('RemoveEachMicroCell.py', [x, y], res);
 });
 
-// rota para deletar todas as microcelulas - parametro {coordenadas}?
-router.delete('/delete_all_microcelulas', (req, res) => {
-    executePython('', [], res);
-});
-
-// rota para calcular a potencia da macrocélula - parametros {raio, coordenadas, potencia, passo}
-router.post('/calculo_potencia_macrocélula', (req, res) => {
-    const { raio, coordenadas, potencia, passo } = req.body;
-    if (!raio || !coordenadas || !potencia || !passo) {
-        return res.status(400).json({ error: 'Parâmetros "raio", "coordenadas", "potencia" e "passo" são obrigatórios.' });
-    }
-    executePython('', [raio, coordenadas, potencia, passo], res);
-});
-
-// rota para calcular a potencia da microcelula - parametros {raio, coordenadas, potencia}
-router.post('/calculo_potencia_microcelula', (req, res) => {
-    const { raio, coordenadas, potencia } = req.body;
-    if (!raio || !coordenadas || !potencia) {
-        return res.status(400).json({ error: 'Parâmetros "raio", "coordenadas" e "potencia" são obrigatórios.' });
-    }
-    executePython('', [raio, coordenadas, potencia], res);
-});
-
-// rota para calcular taxa de outage macrocélula - parametros ?
-router.post('/calculo_taxa_outage_macrocélula', (req, res) => {
-    const { raio, coordenadas, potencia } = req.body;
-    if (!raio || !coordenadas || !potencia) {
-        return res.status(400).json({ error: 'Parâmetros "raio", "coordenadas" e "potencia" são obrigatórios.' });
-    }
-    executePython('', [raio, coordenadas, potencia], res);
-});
-
-// rota para calcular taxa de outage microcélula - parametros ?
-router.post('/calculo_taxa_outage_microcelula', (req, res) => {
-    const { raio, coordenadas, potencia } = req.body;
-    if (!raio || !coordenadas || !potencia) {
-        return res.status(400).json({ error: 'Parâmetros "raio", "coordenadas" e "potencia" são obrigatórios.' });
-    }
-    executePython('', [raio, coordenadas, potencia], res);
+router.post('/delete_all_microcelula', (req, res) => {
+    executePython('ClearAllMicroCell.py', [], res);
 });
 
 module.exports = router;
