@@ -2,6 +2,8 @@
 
 import numpy as np
 import json
+import warnings
+warnings.filterwarnings("ignore", category=RuntimeWarning)
 from fDrawSector import DrawSector
 from fOutageCalculate import OutageCalculate
 
@@ -73,28 +75,29 @@ def GenerateGraph(dFc, dR, dPtdBm, dPtdBmMicro, vtBsMicro, dPasso):
         })
 
     # Calcula O REM de cada Microcélula (caso existam) e acumula a maior potência em cada ponto de medição
-    for iBsD in range(len(vtBsMicro)):
-        mtPosEachBSMicro = (mtPosx + 1j * mtPosy) - vtBsMicro[iBsD]
-        mtDistEachBsMicro = np.abs(mtPosEachBSMicro)
-        mtDistEachBsMicro[mtDistEachBsMicro < dRMin] = dRMin
+    if np.array(vtBsMicro).any():
+        for iBsD in range(len(vtBsMicro)):
+            mtPosEachBSMicro = (mtPosx + 1j * mtPosy) - vtBsMicro[iBsD]
+            mtDistEachBsMicro = np.abs(mtPosEachBSMicro)
+            mtDistEachBsMicro[mtDistEachBsMicro < dRMin] = dRMin
 
-        # Verificando se os pontos estão dentro do raio das microcélulas
-        maskMicro = mtDistEachBsMicro <= dR
-        maskAllPoints = maskAllPoints | maskMicro  # Acumulando a máscara (considerando os pontos dentro de qualquer microcélula)
+            # Verificando se os pontos estão dentro do raio das microcélulas
+            maskMicro = mtDistEachBsMicro <= dR
+            maskAllPoints = maskAllPoints | maskMicro  # Acumulando a máscara (considerando os pontos dentro de qualquer microcélula)
 
-        # Aplicando a máscara nos pontos de medição dentro do raio
-        mtPosEachBSMicroFiltered = mtPosEachBSMicro[maskMicro]
-        mtDistEachBsMicroFiltered = mtDistEachBsMicro[maskMicro]
+            # Aplicando a máscara nos pontos de medição dentro do raio
+            mtPosEachBSMicroFiltered = mtPosEachBSMicro[maskMicro]
+            mtDistEachBsMicroFiltered = mtDistEachBsMicro[maskMicro]
 
-        # Okumura-Hata (cidade urbana) - dB
-        mtPldBMicro = 55 + 38 * np.log10(mtDistEachBsMicroFiltered / 1e3) + (24.5 + (1.5 * dFc) / 925) * np.log10(dFc)
-        mtPowerEachBSdBmMicro = dPtdBmMicro - mtPldBMicro  # Potências recebidas em cada ponto de medição
-        
-        # Cálulo da maior potência em cada ponto de medição
-        mtPowerFinaldBm[maskMicro] = np.maximum(mtPowerFinaldBm[maskMicro], mtPowerEachBSdBmMicro)
+            # Okumura-Hata (cidade urbana) - dB
+            mtPldBMicro = 55 + 38 * np.log10(mtDistEachBsMicroFiltered / 1e3) + (24.5 + (1.5 * dFc) / 925) * np.log10(dFc)
+            mtPowerEachBSdBmMicro = dPtdBmMicro - mtPldBMicro  # Potências recebidas em cada ponto de medição
+            
+            # Cálulo da maior potência em cada ponto de medição
+            mtPowerFinaldBm[maskMicro] = np.maximum(mtPowerFinaldBm[maskMicro], mtPowerEachBSdBmMicro)
 
     # Calculando a taxa de "outage" apenas para os pontos dentro do cluster de ERBs (onde a máscara é True)
-    OutageCalculate (maskAllPoints, mtPowerFinaldBm, dSensitivity)
+    dOutRate = 100*len(np.where(maskAllPoints & (mtPowerFinaldBm < dSensitivity))[0]) / np.sum(maskAllPoints)
     dOutRatePoint = np.where(maskAllPoints, np.where(mtPowerFinaldBm < dSensitivity, 0, 1), np.nan)  # Considerando apenas pontos dentro do cluster
 
     # Adicionar dados do gráfico
@@ -102,9 +105,22 @@ def GenerateGraph(dFc, dR, dPtdBm, dPtdBmMicro, vtBsMicro, dPasso):
         "x": mtPosx.tolist(),
         "y": mtPosx.tolist(),
         "power": mtPowerFinaldBm.tolist(),
-        "outage": dOutRatePoint.tolist()
+        "outage_points": dOutRatePoint.tolist(),
+        "outage_taxa": dOutRate
     })
     
+    # Função para converter os valores nulos (NaN,-,inf) gerados de modo que possam ser lidos no json
+    def convert_nan_inf(obj):
+        if isinstance(obj,float):
+            if np.isnan(obj) or np.isinf(obj):
+                return None
+        elif isinstance(obj,list):
+            return [convert_nan_inf(item) for item in obj]
+        elif isinstance(obj, dict):
+            return {k:convert_nan_inf(v) for k, v in obj.items()}
+        return obj
+    
     # Retornar os dados como JSON
-    print(json.dumps(graph_data))
+    safe_graph_data = convert_nan_inf(graph_data)
+    print(json.dumps(safe_graph_data))
     

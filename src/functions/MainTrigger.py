@@ -14,8 +14,11 @@ dR = float(sys.argv[2])  # Raio do hexágono (m)
 dPasso = float(sys.argv[3]) # Resolução do Grid (m)
 dPtdBm = float(sys.argv[4]) # EIRP em dBm (incluindo ganho e perdas)
 
+# Carrega a potẽncia da microcélulas
+dPtdBmMicro = np.load('PowerMicroCell.npy')
+
 # Carrega o arquivo com os pontos das microcélulas armazenadas
 vtBsMicro = np.load('ListMicroCell.npy') 
 
 # Chamada da função que gera os pontos dos gráficos
-GenerateGraph(dFc, dR, dPtdBm, dPtdBmMicro, vtBsMicro,dPasso) 
+GenerateGraph(dFc, dR, dPtdBm, dPtdBmMicro, vtBsMicro,dPasso)
