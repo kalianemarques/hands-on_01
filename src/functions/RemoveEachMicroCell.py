@@ -1,16 +1,15 @@
-# Este script python adiciona uma microcélula (necessário executar MainTrigger para atualizar o gráfico)
+# Este script python remove uma microcélula com base nas coordenadas X e Y.
 
 import numpy as np
 import sys
 
 # Receber parâmetros da linha de comando
-if len(sys.argv) < 4:
-    print("Uso: python AddEachMicroCell.py <X> <Y> <Power>")
+if len(sys.argv) < 3:
+    print("Uso: python RemoveEachMicroCell.py <X> <Y>")
     sys.exit(1)
 
 X = float(sys.argv[1])  # Coordenada X da microcélula
 Y = float(sys.argv[2])  # Coordenada Y da microcélula
-Power = float(sys.argv[3])  # Potência da Microcélula
 
 # Carregar o arquivo existente ou criar um novo
 try:
@@ -19,11 +18,14 @@ try:
     if vtBsMicro.size == 0:
         vtBsMicro = np.empty((0, 3))
 except FileNotFoundError:
-    vtBsMicro = np.empty((0, 3))  # Matriz vazia com 3 colunas (x, y, power)
+    sys.exit(1)
 
-# Adicionar a nova microcélula
-new_microcell = np.array([[X, Y, Power]])
-vtBsMicro = np.vstack([vtBsMicro, new_microcell])
+# Remover a microcélula correspondente
+mask = ~((vtBsMicro[:, 0] == X) & (vtBsMicro[:, 1] == Y))
+if mask.all():  # Verifica se nenhuma célula foi removida
+    print(f"Microcélula com coordenadas ({X}, {Y}) não encontrada.")
+else:
+    vtBsMicro = vtBsMicro[mask]  # Aplica a máscara para remover a célula
 
 # Salvar o arquivo atualizado
 np.save('ListMicroCell.npy', vtBsMicro)
