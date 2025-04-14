@@ -22,7 +22,7 @@ except FileNotFoundError:
     vtBsMicro = np.empty((0, 3))  # Matriz vazia com 3 colunas (x, y, power)
 
 # Separar posições e potências
-if len(vtBsMicro) > 0:
+if len(vtBsMicro) > 0 and vtBsMicro.ndim == 2:
     microcell_positions = vtBsMicro[:, :2]  # Colunas 0 e 1 (x, y)
     microcell_powers = vtBsMicro[:, 2]  # Coluna 2 (power)
 else:

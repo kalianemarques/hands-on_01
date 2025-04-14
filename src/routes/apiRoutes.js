@@ -10,14 +10,6 @@ router.post('/GenerateGraph', (req, res) => {
     executePython('MainTrigger.py', [frequency, radius, grid, EIRP], res);
 });
 
-router.post('/GenerateGraphWithMicro', (req, res) => {
-    const { frequency, radius, grid, EIRP } = req.body;
-    if (!frequency || !radius || !grid || !EIRP ) {
-        return res.status(400).json({ error: 'Parâmetros "frequency", "radius", "grid", "EIRP" e "EIRPMiro" são obrigatórios.' });
-    }
-    executePython('MainTrigger.py', [frequency, radius, grid, EIRP], res);
-});
-
 router.post('/add_microcelula', (req, res) => {
     const { x, y, power } = req.body;
     if (!x || !y) {

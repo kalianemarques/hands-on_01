@@ -62,26 +62,44 @@ function createGraph(containerId, title, graphData, xScale, yScale, colorScale, 
 
     });
 
-    // Processar pontos
+    // Processar pontos - com tratamento para valores null
     const pointsData = graphData[7];
     const points = [];
-    for (let i = 0; i < pointsData.x.length; i++) {
-        if (Array.isArray(pointsData.x[i])) {
-            for (let j = 0; j < pointsData.x[i].length; j++) {
-                points.push({
-                    x: pointsData.x[i][j],
-                    y: pointsData.y[i][j],
-                    value: pointsData[dataKey][i][j]
-                });
+    if (
+        Array.isArray(pointsData.x) &&
+        Array.isArray(pointsData.y) &&
+        Array.isArray(pointsData[dataKey])
+    ) {
+        for (let i = 0; i < pointsData.x.length; i++) {
+            if (
+                Array.isArray(pointsData.x[i]) &&
+                Array.isArray(pointsData.y[i]) &&
+                Array.isArray(pointsData[dataKey][i])
+            ) {
+                for (let j = 0; j < pointsData.x[i].length; j++) {
+                    // Verificar se os valores existem e não são null antes de adicionar
+                    if (
+                        pointsData.x[i][j] !== undefined &&
+                        pointsData.y[i][j] !== undefined &&
+                        pointsData[dataKey][i][j] !== undefined &&
+                        pointsData.x[i][j] !== null &&
+                        pointsData.y[i][j] !== null &&
+                        pointsData[dataKey][i][j] !== null
+                    ) {
+                        points.push({
+                            x: pointsData.x[i][j],
+                            y: pointsData.y[i][j],
+                            value: pointsData[dataKey][i][j],
+                        });
+                    }
+                }
             }
-        } else {
-            points.push({
-                x: pointsData.x[i],
-                y: pointsData.y[i],
-                value: pointsData[dataKey][i]
-            });
         }
+    } else {
+        console.error("Dados de pointsData estão no formato incorreto:", pointsData);
     }
+
+    console.log(`Pontos válidos para ${title}:`, points.length);
 
     // Plotar pontos com tooltip
     svg.selectAll(".point")
@@ -101,7 +119,7 @@ function createGraph(containerId, title, graphData, xScale, yScale, colorScale, 
                 .style("opacity", .9);
             tooltip.html(`Posição X: ${d.x.toFixed(2)} m<br>
                          Posição Y: ${d.y.toFixed(2)} m<br>
-                         ${title}: ${d.value.toFixed(2)} ${unit}`)
+                         ${title}: ${d.value !== null ? d.value.toFixed(2) : 'N/A'} ${unit}`)
                 .style("left", (event.pageX + 10) + "px")
                 .style("top", (event.pageY - 28) + "px");
         })
@@ -191,20 +209,48 @@ function createGraph(containerId, title, graphData, xScale, yScale, colorScale, 
 export async function plotGraphsFromJSON(graphData) {
     console.log('plotGraphsFromJSON chamada com sucesso!', graphData);
 
-    // Limpar elementos anteriores
+    // Limpar elementos anteriores em power-graphic
     d3.select("#power-graphic").select("svg").remove();
-    d3.select("#outage-graphic").select("svg").remove();
+    console.log(`localStorage.getItem("generateNewGraphic"): ${localStorage.getItem("generateNewGraphic")}`);
+    
+    // Verificar se power-graphic-static já foi plotado
+    if (localStorage.getItem("generateNewGraphic") === "true") {
+        // Limpar elementos anteriores em power-graphic-static
+        d3.select("#power-graphic-static").select("svg").remove();
 
-    // Configurações do SVG
+        // Configurações do SVG
+        const margin = { top: 40, right: 120, bottom: 60, left: 60 };
+        const width = 500 - margin.left - margin.right;
+        const height = 400 - margin.top - margin.bottom;
+
+        const allX = graphData[7].x.flat();
+        const allY = graphData[7].y.flat();
+        const allPower = graphData[7].power.flat();
+
+        const xScale = d3.scaleLinear()
+            .domain([d3.min(allX), d3.max(allX)])
+            .range([0, width]);
+
+        const yScale = d3.scaleLinear()
+            .domain([d3.min(allY), d3.max(allY)])
+            .range([height, 0]);
+
+        const powerColorScale = d3.scaleSequential(d3.interpolateViridis)
+            .domain([d3.min(allPower), d3.max(allPower)]);
+
+        // Criar o gráfico inicial em power-graphic-static
+        createGraph("#power-graphic-static", "Potência (Sem Microcélulas)", graphData, xScale, yScale, powerColorScale, "power", "dBm");
+
+    }
+
+    // Atualizar o gráfico em power-graphic
     const margin = { top: 40, right: 120, bottom: 60, left: 60 };
     const width = 500 - margin.left - margin.right;
     const height = 400 - margin.top - margin.bottom;
 
-    // Criar escalas para os gráficos
     const allX = graphData[7].x.flat();
     const allY = graphData[7].y.flat();
     const allPower = graphData[7].power.flat();
-    const allOutage = graphData[7].outage.flat();
 
     const xScale = d3.scaleLinear()
         .domain([d3.min(allX), d3.max(allX)])
@@ -217,10 +263,5 @@ export async function plotGraphsFromJSON(graphData) {
     const powerColorScale = d3.scaleSequential(d3.interpolateViridis)
         .domain([d3.min(allPower), d3.max(allPower)]);
 
-    const outageColorScale = d3.scaleSequential(d3.interpolateReds)
-        .domain([d3.min(allOutage), d3.max(allOutage)]);
-
-    // Criar gráficos com unidades específicas
-    createGraph("#power-graphic", "Potência", graphData, xScale, yScale, powerColorScale, "power", "dBm");
-    createGraph("#outage-graphic", "Outage", graphData, xScale, yScale, outageColorScale, "outage", "%");
+    createGraph("#power-graphic", "Potência (Com Microcélulas)", graphData, xScale, yScale, powerColorScale, "power", "dBm");
 }
