@@ -29,35 +29,6 @@ export async function powerAndOutage(frequency, radius, grid, EIRP ) {
     }
 }
 
-export async function powerAndOutageMicro(frequency, radius, grid, EIRP ) {
-    try {
-        const data = {
-            frequency: parseFloat(frequency),
-            radius: parseFloat(radius),
-            grid: parseFloat(grid),
-            EIRP: parseFloat(EIRP),
-        };
-        console.log(data);
-        const response = await fetch(`${API_URL}/GenerateGraphWithMicro`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        });
-        const result = await response.json();
-        if (result.error) {
-            alert(result.error);
-            return null;
-        }
-        return result;
-    } catch (err) {
-        console.error(err);
-        alert('Erro ao calcular potência e taxa de outage.');
-        return null;
-    }
-}
-
 export async function addMicrocell(x, y, power) {
     try {
         const data = {

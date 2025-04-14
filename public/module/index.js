@@ -1,9 +1,9 @@
 // +controle dos elementos html e eventos
-import { powerAndOutage, powerAndOutageMicro, addMicrocell, deleteMicrocell, deleteAllMicrocells } from './requests.js';
+import { powerAndOutage, addMicrocell, deleteMicrocell, deleteAllMicrocells } from './requests.js';
 import { plotGraphsFromJSON } from './generateGraphic.js';
 let cont = 0;
 const powerGraphic = document.getElementById("power-graphic");
-const outageGraphic = document.getElementById("outage-graphic");
+const staticGraphic = document.getElementById("power-graphic-static");
 
 const btnAdd = document.getElementById("show-microcelula");
 btnAdd.addEventListener("click", function () {
@@ -25,6 +25,7 @@ btnClose.addEventListener("click", function () {
 
 const btnAddMicro = document.getElementById("add-microcelula");
 btnAddMicro.addEventListener('click', async function () {
+    localStorage.setItem("generateNewGraphic", "false");
     cont++;
     document.getElementById("delet-all-microcelula").style.display = "block";
 
@@ -51,18 +52,20 @@ btnAddMicro.addEventListener('click', async function () {
         const radius = document.getElementById("radius").value;
         const grid = document.getElementById("step").value;
         const EIRP = document.getElementById("power").value;
-        const response = await powerAndOutageMicro(frequency, radius, grid, EIRP );
+        const response = await powerAndOutage(frequency, radius, grid, EIRP );
         if (response) {
             plotGraphsFromJSON(response);
             powerGraphic.style.display = "block";
-            outageGraphic.style.display = "none";
+            staticGraphic.style.display = "none";
+            document.getElementById("result-outage-microcelula").innerText = "";
+            document.getElementById("result-outage-microcelula").innerText = response[7].outage_taxa.toFixed(2);
+            document.getElementById("microcelula").style.display = "block";
         } else {
             console.log("Erro ao calcular potência e taxa de outage.");
         }
     } else {
         console.log("Erro ao adicionar microcélula.");
     }
-
 });
 
 const btnDeleteAll = document.getElementById("delet-all-microcelula");
@@ -79,13 +82,14 @@ btnDeleteAll.addEventListener("click", async function () {
         if (response) {
             plotGraphsFromJSON(response);
             powerGraphic.style.display = "block";
-            outageGraphic.style.display = "none";
+            staticGraphic.style.display = "none";
         } else {
             console.log("Erro ao calcular potência e taxa de outage.");
         }
     } else {
         console.log("Erro ao deletar todas as microcélulas.");
     }
+    document.getElementById("microcelula").style.display = "none";
 });
 
 function generateCard(x, y, power, cont) {
@@ -122,12 +126,11 @@ function generateCard(x, y, power, cont) {
             const radius = document.getElementById("radius").value;
             const grid = document.getElementById("step").value;
             const EIRP = document.getElementById("power").value;
-            // const response = await powerAndOutage(frequency, radius, grid, EIRP); //está gerando o gáfico de quando não tem nenhuma microcélula
-            const response = await powerAndOutageMicro(frequency, radius, grid, EIRP ); //o problema é que mão sei o que passaria em potencia..., não pode ser zero...
+            const response = await powerAndOutage(frequency, radius, grid, EIRP); //está gerando o gáfico de quando não tem nenhuma microcélula
             if (response) {
                 plotGraphsFromJSON(response);
                 powerGraphic.style.display = "block";
-                outageGraphic.style.display = "none";
+                staticGraphic.style.display = "none";
             } else {
                 console.log("Erro ao calcular potência e taxa de outage.");
             }
@@ -147,13 +150,25 @@ function deleteAllCards() {
     cont = 0;
 }
 
-const btnShowOutageArea = document.getElementById("showOutageArea");
+const btnShowOutageArea = document.getElementById("calculateReceivedPowerView");
 btnShowOutageArea.addEventListener("click", function () {
-    document.getElementById("outage-graphic").style.display = "block";
+    document.getElementById("power-graphic-static").style.display = "block";
 });
 
 const btnCalculateReceivedPower = document.getElementById("calculateReceivedPower");
 btnCalculateReceivedPower.addEventListener("click", async function () {    
+    localStorage.setItem("generateNewGraphic", "true");
+
+    const addedMicrocelula = document.getElementById("added-microcelula");
+    if (addedMicrocelula.children.length > 0) {
+        document.getElementById("delet-all-microcelula").style.display = "block";
+        deleteAllCards()
+        const result = await deleteAllMicrocells();
+        if (result) {
+            console.log("Todas as microcélulas foram deletadas com sucesso.");
+        }
+    }
+
     const frequency = document.getElementById("frequency").value;
     const radius = document.getElementById("radius").value;
     const grid = document.getElementById("step").value;
@@ -164,27 +179,11 @@ btnCalculateReceivedPower.addEventListener("click", async function () {
     plotGraphsFromJSON(result);
 
     powerGraphic.style.display = "block";
-    outageGraphic.style.display = "none";
+    staticGraphic.style.display = "none";
     btnShowOutageArea.disabled = false;
     btnAdd.disabled = false;
     cont = 0;
 
-    //deletar todas as microcelulas
-    deleteAllCards()
-    const result2 = await deleteAllMicrocells();
-    if (result2) {
-        console.log("Todas as microcélulas foram deletadas com sucesso.");
-        const frequency = document.getElementById("frequency").value;
-        const radius = document.getElementById("radius").value;
-        const grid = document.getElementById("step").value;
-        const EIRP = document.getElementById("power").value;
-        const response = await powerAndOutage(frequency, radius, grid, EIRP);
-        if (response) {
-            plotGraphsFromJSON(response);
-            powerGraphic.style.display = "block";
-            outageGraphic.style.display = "none";
-        } else {
-            console.log("Erro ao calcular potência e taxa de outage.");
-        }
-    }
+    document.getElementById("macrocelula").style.display = "block";
+    document.getElementById("result-outage-macrocelula").innerText = result[7].outage_taxa.toFixed(2);
 });
