@@ -73,7 +73,6 @@ btnDeleteAll.addEventListener("click", async function () {
     deleteAllCards();
     const result = await deleteAllMicrocells();
     if (result) {
-        console.log("Todas as microcélulas foram deletadas com sucesso.");
         const frequency = document.getElementById("frequency").value;
         const radius = document.getElementById("radius").value;
         const grid = document.getElementById("step").value;
@@ -92,9 +91,7 @@ btnDeleteAll.addEventListener("click", async function () {
     document.getElementById("microcelula").style.display = "none";
 });
 
-function generateCard(x, y, power, cont) {
-    console.log(`Gerando card de microcelula com coordenadas (${x}, ${y}) e potência ${power} dBm`);
-    
+function generateCard(x, y, power, cont) {    
     const card = document.createElement("div");
     card.className = "card-microcelula";
 
@@ -120,7 +117,6 @@ function generateCard(x, y, power, cont) {
         // Chamar a requisição para deletar a microcélula
         const result = await deleteMicrocell(x, y);
         if (result) {
-            console.log(`Microcélula (${x}, ${y}) deletada com sucesso.`);
             // Atualizar o gráfico
             const frequency = document.getElementById("frequency").value;
             const radius = document.getElementById("radius").value;
@@ -163,10 +159,7 @@ btnCalculateReceivedPower.addEventListener("click", async function () {
     if (addedMicrocelula.children.length > 0) {
         document.getElementById("delet-all-microcelula").style.display = "block";
         deleteAllCards()
-        const result = await deleteAllMicrocells();
-        if (result) {
-            console.log("Todas as microcélulas foram deletadas com sucesso.");
-        }
+        deleteAllMicrocells();
     }
 
     const frequency = document.getElementById("frequency").value;

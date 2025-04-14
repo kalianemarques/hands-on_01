@@ -8,7 +8,6 @@ export async function powerAndOutage(frequency, radius, grid, EIRP ) {
             grid: parseFloat(grid),
             EIRP: parseFloat(EIRP),
         };
-        console.log(data);
         const response = await fetch(`${API_URL}/GenerateGraph`, {
             method: 'POST',
             headers: {
