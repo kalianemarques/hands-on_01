@@ -3,13 +3,14 @@ import { powerAndOutage, addMicrocell, deleteMicrocell, deleteAllMicrocells } fr
 import { plotGraphsFromJSON } from './generateGraphic.js';
 let cont = 0;
 const powerGraphic = document.getElementById("power-graphic");
+const outageGraphic = document.getElementById("outage-graphic");
 const staticGraphic = document.getElementById("power-graphic-static");
+const addedMicrocelula = document.getElementById("added-microcelula");
 
 const btnAdd = document.getElementById("show-microcelula");
 btnAdd.addEventListener("click", function () {
     document.getElementById("hidden").style.display = "block";
     //verifica se added-microcelula tem algum filho
-    const addedMicrocelula = document.getElementById("added-microcelula");
     if (addedMicrocelula.children.length > 0) {
         document.getElementById("delet-all-microcelula").style.display = "block";
     } else {
@@ -42,7 +43,6 @@ btnAddMicro.addEventListener('click', async function () {
     }
     
     const card = generateCard(x, y, power, cont);
-    const addedMicrocelula = document.getElementById("added-microcelula");
     addedMicrocelula.appendChild(card);
 
     // fazer a requisição para adicionar os pontos da microcelula
@@ -56,6 +56,7 @@ btnAddMicro.addEventListener('click', async function () {
         if (response) {
             plotGraphsFromJSON(response);
             powerGraphic.style.display = "block";
+            outageGraphic.style.display = "block";
             staticGraphic.style.display = "none";
             document.getElementById("result-outage-microcelula").innerText = "";
             document.getElementById("result-outage-microcelula").innerText = response[7].outage_taxa.toFixed(2);
@@ -81,6 +82,7 @@ btnDeleteAll.addEventListener("click", async function () {
         if (response) {
             plotGraphsFromJSON(response);
             powerGraphic.style.display = "block";
+            outageGraphic.style.display = "block";
             staticGraphic.style.display = "none";
         } else {
             console.log("Erro ao calcular potência e taxa de outage.");
@@ -126,6 +128,7 @@ function generateCard(x, y, power, cont) {
             if (response) {
                 plotGraphsFromJSON(response);
                 powerGraphic.style.display = "block";
+                outageGraphic.style.display = "block";
                 staticGraphic.style.display = "none";
             } else {
                 console.log("Erro ao calcular potência e taxa de outage.");
@@ -140,22 +143,22 @@ function generateCard(x, y, power, cont) {
 }
 
 function deleteAllCards() {
-    const addedMicrocelula = document.getElementById("added-microcelula");
     addedMicrocelula.innerHTML = "";
     document.getElementById("delet-all-microcelula").style.display = "none";
     cont = 0;
 }
 
-const btnShowOutageArea = document.getElementById("calculateReceivedPowerView");
-btnShowOutageArea.addEventListener("click", function () {
-    document.getElementById("power-graphic-static").style.display = "block";
+const viewReceivedPower = document.getElementById("viewReceivedPower");
+viewReceivedPower.addEventListener("click", function () {
+    if (addedMicrocelula.children.length > 0) {
+        document.getElementById("power-graphic-static").style.display = "block";
+    }
 });
-
 const btnCalculateReceivedPower = document.getElementById("calculateReceivedPower");
 btnCalculateReceivedPower.addEventListener("click", async function () {    
     localStorage.setItem("generateNewGraphic", "true");
 
-    const addedMicrocelula = document.getElementById("added-microcelula");
+    
     if (addedMicrocelula.children.length > 0) {
         document.getElementById("delet-all-microcelula").style.display = "block";
         deleteAllCards()
@@ -172,11 +175,13 @@ btnCalculateReceivedPower.addEventListener("click", async function () {
     plotGraphsFromJSON(result);
 
     powerGraphic.style.display = "block";
+    outageGraphic.style.display = "block";
     staticGraphic.style.display = "none";
-    btnShowOutageArea.disabled = false;
+    viewReceivedPower.disabled = false;
     btnAdd.disabled = false;
     cont = 0;
 
     document.getElementById("macrocelula").style.display = "block";
     document.getElementById("result-outage-macrocelula").innerText = result[7].outage_taxa.toFixed(2);
+    viewReceivedPower.style.display = "block";
 });

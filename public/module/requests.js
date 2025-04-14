@@ -35,7 +35,6 @@ export async function addMicrocell(x, y, power) {
             y: parseFloat(y),
             power: parseFloat(power),
         };
-        console.log(data);
         const response = await fetch(`${API_URL}/add_microcelula`, {
             method: 'POST',
             headers: {
@@ -62,7 +61,6 @@ export async function deleteMicrocell(x,y) {
             x: parseFloat(x),
             y: parseFloat(y),
         };
-        console.log(data);
         const response = await fetch(`${API_URL}/delete_microcelula`, {
             method: 'POST',
             headers: {

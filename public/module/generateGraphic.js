@@ -267,6 +267,6 @@ export async function plotGraphsFromJSON(graphData) {
     const powerColorScale = d3.scaleSequential(d3.interpolateViridis)
         .domain([d3.min(allPower), d3.max(allPower)]);
 
-    createGraph("#power-graphic", "Potência (Com Microcélulas)", graphData, xScale, yScale, powerColorScale, "power", "dBm");
+    createGraph("#power-graphic", "Potência", graphData, xScale, yScale, powerColorScale, "power", "dBm");
     createGraph("#outage-graphic", "Outage", graphData, xScale, yScale, "", "outage_points", "");
 }
