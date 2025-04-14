@@ -99,7 +99,12 @@ function createGraph(containerId, title, graphData, xScale, yScale, colorScale, 
         console.error("Dados de pointsData estão no formato incorreto:", pointsData);
     }
 
-    console.log(`Pontos válidos para ${title}:`, points.length);
+    // Configurar escala de cores para outage
+    if (dataKey === "outage_points") {
+        colorScale = d3.scaleOrdinal()
+            .domain([0, 1])
+            .range(["black", "#f74626"]); // Preto para 0, vermelho para 1
+    }
 
     // Plotar pontos com tooltip
     svg.selectAll(".point")
@@ -207,11 +212,9 @@ function createGraph(containerId, title, graphData, xScale, yScale, colorScale, 
 }
 /// Função principal para plotar os gráficos a partir do JSON
 export async function plotGraphsFromJSON(graphData) {
-    console.log('plotGraphsFromJSON chamada com sucesso!', graphData);
-
     // Limpar elementos anteriores em power-graphic
     d3.select("#power-graphic").select("svg").remove();
-    console.log(`localStorage.getItem("generateNewGraphic"): ${localStorage.getItem("generateNewGraphic")}`);
+    d3.select("#outage-graphic").select("svg").remove();
     
     // Verificar se power-graphic-static já foi plotado
     if (localStorage.getItem("generateNewGraphic") === "true") {
@@ -251,6 +254,7 @@ export async function plotGraphsFromJSON(graphData) {
     const allX = graphData[7].x.flat();
     const allY = graphData[7].y.flat();
     const allPower = graphData[7].power.flat();
+    const allOutage = graphData[7].outage_points.flat();
 
     const xScale = d3.scaleLinear()
         .domain([d3.min(allX), d3.max(allX)])
@@ -263,5 +267,6 @@ export async function plotGraphsFromJSON(graphData) {
     const powerColorScale = d3.scaleSequential(d3.interpolateViridis)
         .domain([d3.min(allPower), d3.max(allPower)]);
 
-    createGraph("#power-graphic", "Potência (Com Microcélulas)", graphData, xScale, yScale, powerColorScale, "power", "dBm");
+    createGraph("#power-graphic", "Potência", graphData, xScale, yScale, powerColorScale, "power", "dBm");
+    createGraph("#outage-graphic", "Outage", graphData, xScale, yScale, "", "outage_points", "");
 }
