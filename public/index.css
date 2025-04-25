@@ -54,7 +54,19 @@ body {
     border-radius: 5px;
 }
 
-#inputs button {
+/* Estilo para a seção de buttons */
+#buttons {
+    background: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 994px;
+}
+
+#buttons button {
     width: 100%;
     padding: 10px;
     font-size: 1rem;
@@ -65,9 +77,12 @@ body {
     cursor: pointer;
     margin-top: 10px;
     transition: background-color 0.3s;
+    gap: 8px;
+    display: flex;
+    flex-direction: column;
 }
 
-#inputs button:hover {
+#buttons button:hover {
     background-color: #005a9e;
 }
 
@@ -80,6 +95,7 @@ body {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     width: 100%;
     max-width: 994px;
+    height: 210px;
 }
 
 #results p {

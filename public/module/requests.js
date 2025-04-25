@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3001/api';
+const API_URL = 'http://localhost:3000/api';
 
 export async function powerAndOutage(frequency, radius, grid, EIRP ) {
     try {
