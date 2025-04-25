@@ -1,6 +1,6 @@
 # Hands-on 01 - Cálculos de Redes
 
-Este projeto é uma aplicação web que realiza cálculos relacionados a redes de telecomunicações, como potência recebida, taxa de Outage e raio celular utilizando os modelos Okumura-Hata e COST-Hata.
+Este projeto é uma aplicação web que realiza cálculos relacionados a redes de telecomunicações, como potência recebida e taxa de Outage a partir de dados de entrada utilizando o modelo Okumura-Hata.
 
 ---
 
