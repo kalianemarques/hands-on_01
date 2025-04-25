@@ -184,4 +184,5 @@ btnCalculateReceivedPower.addEventListener("click", async function () {
     document.getElementById("macrocelula").style.display = "block";
     document.getElementById("result-outage-macrocelula").innerText = result[7].outage_taxa.toFixed(2);
     viewReceivedPower.style.display = "block";
+    document.getElementById("microcelula").style.display = "none";
 });
